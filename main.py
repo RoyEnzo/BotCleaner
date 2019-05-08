@@ -7,7 +7,7 @@ __version__ = "1.0.0"
 __email__ = "enzo.r@eduge.ch"
 __status__ = "Development"
 
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request, jsonify
 from streaming import StreamingOutput
 import picamera
 
@@ -31,6 +31,13 @@ def live_streaming():
 def video_feed():
     """Flux video de la camera"""
     return Response(output.gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@app.route('/web_controler/cmd', methods=['POST'])
+def web_controller():
+    content = request.get_json()
+
+    return jsonify(status=200) # TODO fonction a bien traité le contenu json
 
 
 if __name__ == '__main__':

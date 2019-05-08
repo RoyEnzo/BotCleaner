@@ -3,12 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link src="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" media="screen">
+
     <title>BotCleaner - Contrôleur</title>
+
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script>
+        var codeBtnPressed = 'touchstart mousedown';
+        var codeBtnRelease = 'touchend mouseup';
+        var postCmdBtnRelease = "stop";
+        var urlPostCmd = "/web_controller/cmd";
+
+        /* Ajout des fonctions lorsque:
+         * - un bouton est pressé
+         * - un bouton est relaché*/
+        $(function() {
+            $(".btn").on(codeBtnPressed , function() {
+                postCmd(this.id);
+            });
+            $(".btn").on(codeBtnRelease, function() {
+                postCmd(postCmdBtnRelease);
+            });
+        });
+
+        /* Requête POST envoyé au serveur flask */
+        function postCmd(cmd){
+            var req = { "cmd": cmd.toString() };
+            $.post(urlPostCmd,req);
+        }
+    </script>
 </head>
 <body>
-<div id="container" class="container" align="center">
+<div class="">
     <h1>Flux vidéo</h1>
     <img src="{{ url_for('video_feed') }}" alt="stream">
 </div>
+<table class="">
+		<tr>
+			<td>
+				<div >
+					<button id="forward" class="btn"></button>
+				</div>
+				<div>
+					<button id='turn_left' class="btn"></button>
+					<button id='turn_right' class="btn"></button>
+				</div>
+				<div>
+					<button id='backward' class="btn"></button>
+				</div>
+			</td>
+		</tr>
+	</table>
 </body>
 </html>
+
