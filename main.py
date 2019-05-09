@@ -9,15 +9,21 @@ __status__ = "Development"
 
 from flask import Flask, Response, render_template, request, jsonify
 from streaming import StreamingOutput
-import picamera
+from controller import Controller
+from alphabot2 import AlphaBot2
 
 # Serveur flask
 app = Flask(__name__)
 
+# Robot
+robot = AlphaBot2()
+
+# Controller
+controller = Controller(robot)
+
 # Flux video
-camera = picamera.PiCamera(resolution='640x480')
 output = StreamingOutput()
-camera.start_recording(output, format='mjpeg')
+robot.camera.start_recording(output, format='mjpeg')
 
 
 # CAMERA
@@ -33,11 +39,14 @@ def video_feed():
     return Response(output.gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/web_controler/cmd', methods=['POST'])
+@app.route('/web_controller/cmd', methods=['POST'])
 def web_controller():
-    content = request.get_json()
+    """ Recois les informations de la manette web """
+    cmd = request.form['cmd']
 
-    return jsonify(status=200) # TODO fonction a bien traité le contenu json
+    controller.command(cmd)
+
+    return jsonify(status=200)
 
 
 if __name__ == '__main__':

@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+	<!-- -->
     <link src="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" media="screen">
 
     <title>BotCleaner - Contrôleur</title>
 
     <script src="{{ url_for('static', filename='jquery.js') }}"></script>
     <script>
-        var codeBtnPressed = 'touchstart mousedown';
-        var codeBtnRelease = 'touchend mouseup';
-        var postCmdBtnRelease = "stop";
-        var urlPostCmd = "/web_controller/cmd";
+        let codeBtnPressed = 'touchstart mousedown';
+        let codeBtnRelease = 'touchend mouseup';
+        let postCmdBtnRelease = "stop";
+        let urlPostCmd = "/web_controller/cmd";
 
-        /* Ajout des fonctions lorsque:
+        /* Execute les fonctions lorsque:
          * - un bouton est pressé
-         * - un bouton est relaché*/
+         * - un bouton est relaché
+         * */
         $(function() {
             $(".btn").on(codeBtnPressed , function() {
                 postCmd(this.id);
@@ -29,8 +30,10 @@
 
         /* Requête POST envoyé au serveur flask */
         function postCmd(cmd){
-            var req = { "cmd": cmd.toString() };
-            $.post(urlPostCmd,req);
+            var data = { "cmd": cmd };
+            $.post(urlPostCmd,data, function (dstatus){
+				console.log('${status}');
+			});
         }
     </script>
 </head>
