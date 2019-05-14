@@ -21,21 +21,24 @@ class Motor:
         """ Change le rapport cyclique du moteur """
         self.pwm.ChangeDutyCycle(duty_cycle)
 
-    def rotate_counterclockwise(self):
+    def rotate_counterclockwise(self, duty_cycle):
         """ Tourne le moteur dans le sens antihoraire """
         GPIO.output(self.IN1, GPIO.HIGH)
         GPIO.output(self.IN2, GPIO.LOW)
+        self.change_duty_cycle(duty_cycle)
 
-    def rotate_clockwise(self):
+
+    def rotate_clockwise(self, duty_cycle):
         """ Tourne le moteur dans le sens horaire """
         GPIO.output(self.IN1, GPIO.LOW)
         GPIO.output(self.IN2, GPIO.HIGH)
+        self.change_duty_cycle(duty_cycle)
 
     def stop(self):
         """ Arrete le moteur """
-        self.change_duty_cycle(0)
         GPIO.output(self.IN1, GPIO.LOW)
         GPIO.output(self.IN2, GPIO.LOW)
+        self.change_duty_cycle(0)
 
     def __del__(self):
         GPIO.cleanup()

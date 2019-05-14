@@ -11,6 +11,7 @@ from flask import Flask, Response, render_template, request, jsonify
 from streaming import StreamingOutput
 from controller import Controller
 from alphabot2 import AlphaBot2
+import picamera
 
 # Serveur flask
 app = Flask(__name__)
@@ -22,8 +23,9 @@ robot = AlphaBot2()
 controller = Controller(robot)
 
 # Flux video
+camera = picamera.PiCamera(resolution="640x480")
 output = StreamingOutput()
-robot.camera.start_recording(output, format='mjpeg')
+camera.start_recording(output, format='mjpeg')
 
 
 # CAMERA

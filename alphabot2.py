@@ -1,22 +1,19 @@
 import RPi.GPIO as GPIO
 import math
 from motor import Motor
-import picamera
 
 class AlphaBot2:
 
-    PICAM_RES = '640x480'
     BCM_AIN1 = 12       # GPIOs moteur droit (inversion ain1 et ain2 - moteur inverse)
     BCM_AIN2 = 13
     BCM_PWMA = 6        # - puissance
     BCM_BIN1 = 20       # GPIOs moteur gauche
     BCM_BIN2 = 21
     BCM_PWMB = 26       # - puissance
-    DEFAULT_DC = 50     # rapport cyclique (0 <= dc <= 100)
+    DEFAULT_DC = 30     # rapport cyclique (0 <= dc <= 100)
     FREQUENCY = 500     # valeur de reference
 
     def __init__(self):
-        self.camera = picamera.PiCamera(resolution=self.PICAM_RES)
         self.dc_a = self.DEFAULT_DC
         self.dc_b = self.DEFAULT_DC
 
@@ -30,11 +27,9 @@ class AlphaBot2:
 
     def forward(self):
         """ Active les deux moteurs pour aller en avant """
-        self.motor_a.rotate_clockwise()
-        self.motor_b.rotate_counterclockwise()
+        self.motor_a.rotate_clockwise(self.dc_a)
+        self.motor_b.rotate_counterclockwise(self.dc_b)
 
-        self.motor_a.change_duty_cycle(self.dc_a)
-        self.motor_b.change_duty_cycle(self.dc_b)
 
     def stop(self):
         """ Desactive les deux moteurs """
@@ -43,31 +38,24 @@ class AlphaBot2:
 
     def backward(self):
         """ Active les deux moteurs pour aller en arrière """
-        self.motor_a.rotate_counterclockwise()
-        self.motor_b.rotate_clockwise()
+        self.motor_a.rotate_counterclockwise(self.dc_a)
+        self.motor_b.rotate_clockwise(self.dc_b)
 
-        self.motor_a.change_duty_cycle(self.dc_a)
-        self.motor_b.change_duty_cycle(self.dc_b)
 
     def turn_left(self):
         """ Active les deux moteurs, B en avant, A en arriere  """
-        self.motor_a.rotate_counterclockwise()
-        self.motor_b.rotate_counterclockwise()
+        self.motor_a.rotate_counterclockwise(self.dc_a)
+        self.motor_b.rotate_counterclockwise(self.dc_b)
 
-        self.motor_a.change_duty_cycle(self.dc_a)
-        self.motor_b.change_duty_cycle(self.dc_b)
 
     def turn_right(self):
         """ Active les deux moteurs, B en arriere, A en avant """
-        self.motor_a.rotate_clockwise()
-        self.motor_b.rotate_clockwise()
+        self.motor_a.rotate_clockwise(self.dc_a)
+        self.motor_b.rotate_clockwise(self.dc_b)
 
-        self.motor_a.change_duty_cycle(self.dc_a)
-        self.motor_b.change_duty_cycle(self.dc_b)
 
     def set_duty_cycle_a(self, duty_cycle):
-        """ Change le rapport cyclique du moteur A
-            Puis """
+        """ Change le rapport cyclique du moteur A """
         self.dc_a = duty_cycle
 
         if 0 <= self.dc_a:
