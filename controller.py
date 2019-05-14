@@ -8,7 +8,7 @@ class Controller:
     CMD_TURN_RIGHT = "turn_right"
     CMD_STOP = "stop"
 
-    def __init__(self,alphabot):
+    def __init__(self,alphabot: AlphaBot2):
         self.alphabot = alphabot
 
     def command(self, cmd):

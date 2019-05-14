@@ -1,5 +1,4 @@
 import RPi.GPIO as GPIO
-import math
 from motor import Motor
 
 class AlphaBot2:
@@ -63,7 +62,7 @@ class AlphaBot2:
         elif 0 >= self.dc_a:
             self.motor_a.rotate_counterclockwise()
 
-        self.pwm_a.ChangeDutyCycle(math.abs(self.dc_a))
+        self.pwm_a.ChangeDutyCycle(abs(self.dc_a))
 
     def set_duty_cycle_b(self, duty_cycle):
         """ Change le rapport cyclique du moteur B"""
@@ -74,7 +73,7 @@ class AlphaBot2:
         elif 0 >= self.dc_b:
             self.motor_b.rotate_counterclockwise()
 
-        self.pwm_b.ChangeDutyCycle(math.abs(self.dc_b))
+        self.pwm_b.ChangeDutyCycle(abs(self.dc_b))
 
     def set_duty_cycle(self, left, right):
         """ Change le rapport cyclique du moteur A et B """
