@@ -25,7 +25,7 @@ TEMPLATE_CNTLR = 'index.html'
 URL_VIDEO_FEED = '/camera/video_feed'
 URL_LAST_FRAME = '/camera/last_frame'
 
-CAM_RESOLUTION = '640x480'
+CAM_RESOLUTION = '1640x1232'  # FoV full
 
 # Robot
 robot = AlphaBot2()
