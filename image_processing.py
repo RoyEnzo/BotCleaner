@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 
 SCALE = 0.1
 URL = 'http://10.134.97.49:5000/camera/last_frame?scale=' + str(SCALE)
-LOWER_ORANGE = (0, 100, 100)  #HSV
+LOWER_ORANGE = (0, 160, 160)  #HSV
 UPPER_ORANGE = (20, 255, 255)
 LOWER_BLACK = ()
 UPPER_BLACK = ()
