@@ -2,8 +2,7 @@
 Utilitaire de streaming AlphaBot2
 --
 Sources:
-https://blog.miguelgrinberg.com/post/video-streaming-with-flask
-https://raw.githubusercontent.com/RuiSantosdotme/Random-Nerd-Tutorials/master/Projects/rpi_camera_surveillance_system.py
+https://picamera.readthedocs.io/en/latest/recipes2.html
 """
 
 

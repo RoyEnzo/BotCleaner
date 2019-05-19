@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<!-- -->
-    <link src="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" media="screen">
-
     <title>BotCleaner - Contrôleur</title>
 
     <script src="{{ url_for('static', filename='jquery.js') }}"></script>
@@ -29,6 +26,7 @@
         });
 
         /* Requête POST */
+		// Envoie l'id du bouton, cela correspond a l action a realiser
         function postCmd(cmd){
             var data = { "cmd": cmd };
             $.post(urlPostCmd,data, function (dstatus){
