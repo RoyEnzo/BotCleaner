@@ -1,89 +1,183 @@
 import cv2
 from skimage import io, transform
 from matplotlib import pyplot as plt
+import requests
 
-URL = 'http://10.134.99.231:5000/camera/last_frame'
-LOWER_ORANGE = (0, 100, 100)  #HSV
-UPPER_ORANGE = (20, 255, 255)
-LOWER_BLACK = ()
-UPPER_BLACK = ()
-PROCESS_SCALE = 0.05
+URL_SERVER = 'http://10.134.99.231:5000'
+PATH_LAST_FRAME = '/api/camera/last_frame'
+PATH_ANALYSE_CNTLR = '/api/analyse'
+
+PROCESS_SCALE = 0.02
 REVERSE_PROCESS_SCALE = 1 / PROCESS_SCALE
 
-def get_image_url(url: str):
-    return io.imread(url)
+DEFAULT_OBJECT_COORD = -1
 
-def rescale_image(img,scale):
-    width = int(img.shape[1] * scale)
-    height = int(img.shape[0] * scale)
+BLACK_VALUE = 0  # GRAYSCALE
+WHITE_VALUE = 255
+LOWER_COLOR = (0, 100, 100)  #HSV
+UPPER_COLOR = (20, 255, 255)
 
-    return cv2.resize(img, (width, height))
-def rescale_coords(coords):
-    (y1, x1), (y2, x2) = coords
+def get_image_url(url):
+    """
+    Récupère l'image à partir de url
+    Args:
+        url: str url de l'image
 
-    y1_scaled = int(y1 * REVERSE_PROCESS_SCALE)
-    x1_scaled = int(x1 * REVERSE_PROCESS_SCALE)
-    y2_scaled = int(y2 * REVERSE_PROCESS_SCALE)
-    x2_scaled = int(x2 * REVERSE_PROCESS_SCALE)
+    Returns:
+        imageio image de l'url ou -1
 
-    return ((y1_scaled,x1_scaled),(y2_scaled,x2_scaled))
+    """
+    try:
+        return io.imread(url)
+    except:
+        print('Cannot get image image from url :'+url)
+        return -1
 
-def get_mask_color_range(img,lower_color,upper_color):
-    image_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+def rescale_image(image, scale):
+    """
+    Redimensionne l'image à l'échelle donnée
+    Args:
+        image:  imageio image à redimensionner
+        scale:  float échelle
+
+    Returns:
+        imageio image redi
+
+    """
+    try:
+        width = int(img.shape[1] * scale)
+        height = int(img.shape[0] * scale)
+
+        return cv2.resize(image, (width, height))
+    except:
+        print('Cannot rescale image')
+        return -1
+
+def rescale_coords(coords,scale):
+    """
+    Redimensionne les coordonnées à l'échelle
+    Args:
+        coords: tuple((x0,y0),(x1,y1)) coordonnées à redimensionner
+        scale:  float échelle
+
+    Returns:
+        coordonnées misent à l'échelle
+
+    """
+    (y0, x0), (y1, x1) = coords
+
+    y0_scaled = int(y0 * scale)
+    x0_scaled = int(x0 * scale)
+    y1_scaled = int(y1 * scale)
+    x1_scaled = int(x1 * scale)
+
+    return ((y0_scaled,x0_scaled),(y1_scaled,x1_scaled))
+
+def get_mask_color_range(image,lower_color,upper_color):
+    """
+    Obtient le masque des pixels situés entre deux couleurs HSV
+    Args:
+        image: imageio image à filtrer
+        lower_color: tuple(h,s,v) couleur la plus claire
+        upper_color: tuple(h,s,v) couleur la plus foncée
+
+    Returns:
+        ndarray masque des pixels entre les deux couleurs
+
+    """
+    image_hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 
     return cv2.inRange(image_hsv, lower_color, upper_color)
 
-def find_border_surface(img):
-    start_index_y = start_index_surface_border_y(img)
-    border_coord = []
+def get_coords_top_surface(mask_surface):
+    """
+    Obtient tous les pixels du bord supérieur de la surface
+    Args:
+        mask_surface: ndarray masque à traiter
 
-    for column_index in range(img.shape[1]):
-        column = array2d_column(img[start_index_y::],column_index)
+    Returns:
+        list coordonnées de la bordure supérieure
+
+    """
+    start_index_y = get_start_index_border_surface(mask_surface)
+    border_coords = []
+
+    for column_index in range(mask_surface.shape[1]):
+        column = array2d_column(mask_surface[start_index_y::], column_index)
         for row_index, value in enumerate(column):
             if value > 0:
-                border_coord.append((row_index+start_index_y, column_index))
+                border_coords.append((row_index+start_index_y, column_index))
                 break
 
-    return border_coord
+    return border_coords
 
-def find_object(img, mask_surface, border_surface):
-    y1_object = -1
-    x1_object = -1
-    y2_object = -1
-    x2_object = -1
+def find_object(mask_surface, border_surface_coords):
+    """
+    Obtient les coordonnées de l'objet dans la zone
+    Args:
+        mask_surface: ndarray masque de la surface
+        border_surface_coords: list coordonnées des points de la face suppérieur de la zone
 
-    # Pour chaque colonne
-    for column_index in range(mask_surface.shape[1]):
-        # Debut de la col
-        start_row_index = border_surface[column_index][0]
-        # La colonne a partir le bord de la surface
-        column = array2d_column(mask_surface[start_row_index::], column_index)
+    Returns:
+        tuple((y0,x0),(y1,x1)) Cordonnées de l'objet, tout a -1 si rien trouvé
+    """
+    
+    y0 = DEFAULT_OBJECT_COORD
+    x0 = DEFAULT_OBJECT_COORD
+    y1 = DEFAULT_OBJECT_COORD
+    x1 = DEFAULT_OBJECT_COORD
+
+    # Scan pour chaque colonnes
+    for start_row_index, column_index in border_surface_coords:
+
+        # Coupe la colonne a partir du bord de la surface
+        column_crop = mask_surface[start_row_index::]
+
+        column_values = array2d_column(column_crop, column_index)
 
         # SI il y a du noir
-        if sum(column) != len(column) * 255:
-            # Enregistre le x1 le plus bas
-            if x1_object == -1:
-                x1_object = column_index
-                
-            # Enregistre le x2 le plus eleve
-            x2_object = column_index
+        if min(column_values) == BLACK_VALUE:
 
-            # Pour chaque colonne cherche le y1 le plus bas et y2 le plus haut
-            for row_index, value in enumerate(column):
-                row_index += start_row_index
-                if (y1_object > row_index or y1_object == -1) and value == 0:
-                    y1_object = row_index
-                if y2_object < row_index and value == 0:
-                    y2_object = row_index
+            # Premiere ligne comportant du noir -> x0
+            # Derniere ligne comportant du noir -> x1
+            if x0 == DEFAULT_OBJECT_COORD:
+                x0 = column_index
+            else:
+                x1 = column_index
 
-    return ((y1_object,x1_object),(y2_object,x2_object))
+            # PCherche le y0 le plus bas et y1 le plus haut dans la colonne
+            for row_index, value in enumerate(column_values):
+                row_index += start_row_index  # Colonne coupé à partir du bord précédemment
+                if (y0 > row_index or y0 == DEFAULT_OBJECT_COORD) and value == BLACK_VALUE:
+                    y0 = row_index
+                if y1 < row_index and value == BLACK_VALUE:
+                    y1 = row_index
 
-def array2d_column(matrix, i):
-    return [row[i] for row in matrix]
+    return ((y0,x0),(y1,x1))
 
-def start_index_surface_border_y(surface):
+def array2d_column(array_2d, index):
+    """
+    Récupère la colonne d'un tableau 2d
+    Args:
+        array_2d: ndarray tableau 2 dimensions
+        index: int index de la colonne
+
+    Returns:
+        ndarray colonne du tableau 2d
+    """
+    return [row[index] for row in array_2d]
+
+def get_start_index_border_surface(mask_surface):
+    """
+    Récupère index de la première ligne comportant la surface
+    Args:
+        mask_surface: ndarray masque à analyser
+
+    Returns:
+        index de la première ligne comportant la surface
+    """
     index_y_border = 0
-    lines_value = [sum(i) for i in surface]
+    lines_value = [sum(i) for i in mask_surface]
 
     for index, line_value in enumerate(lines_value):
         if index > 0:
@@ -92,27 +186,47 @@ def start_index_surface_border_y(surface):
 
     return index_y_border
 
-def draw_square(img, coords):
+def draw_square(image, coords):
+    """
+    Dessine un carré sur l'image
+    Args:
+        image: ndarray image à modifier
+        coords: tuple coordonnées du carré
+    Returns:
+        image dessinée
+    """
     (y1,x1),(y2, x2) = coords
 
-    cv2.rectangle(img, (x1,y1), (x2,y2), (0, 255, 0), 10)
+    image_drawn = cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 10)
 
-def show_image(img):
-    io.imshow(img)
+    return image_drawn
+
+def show_image(image):
+    """
+    Affiche l'image
+    Args:
+        image: ndarray image à afficher
+    """
+    io.imshow(image)
     plt.show()
 
 if __name__ == '__main__':
-    img = get_image_url(URL)
-    print(type(img))
-    img_rescaled = rescale_image(img, PROCESS_SCALE)
+    while True:
+        # Récupération de l'image et mise à l'échelle
+        img = get_image_url(URL_SERVER+PATH_LAST_FRAME)
+        img_rescaled = rescale_image(img, PROCESS_SCALE)
 
-    surface_mask = get_mask_color_range(img_rescaled,LOWER_ORANGE,UPPER_ORANGE)
-    surface_border_coord = find_border_surface(surface_mask)
+        # Récupère la surface de travail du robot
+        surface_mask = get_mask_color_range(img_rescaled, LOWER_COLOR, UPPER_COLOR)
+        surface_border_coord = get_coords_top_surface(surface_mask)
 
-    coords_object = rescale_coords(find_object(img, surface_mask, surface_border_coord))
+        # Cherche l'objet
+        coords_object = find_object(surface_mask, surface_border_coord)
+        ((y0,x0),(y1,x1)) = rescale_coords(coords_object,REVERSE_PROCESS_SCALE)
 
-    draw_square(img, coords_object)
-    print(type(img))
-    show_image(img)
-    #show_image(surface)
+        # Envoie au serveur les données
+        coords = {'x0': x0,'y0': y0, 'x1': x1, 'y1': y1}
+        path = URL_SERVER+PATH_ANALYSE_CNTLR
+        r = requests.post(path, data=coords)
+        print(r.status_code)
 

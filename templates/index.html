@@ -7,10 +7,11 @@
 
     <script src="{{ url_for('static', filename='jquery.js') }}"></script>
     <script>
+		let CHANGE_SPEED = "speed=";
         let codeBtnPressed = 'touchstart mousedown';
         let codeBtnRelease = 'touchend mouseup';
         let postCmdBtnRelease = "stop";
-        let urlPostCmd = "/web_controller/cmd";
+        let urlPostCmd = "/api/robot/cmd";
 
         /* Execute les fonctions lorsque:
          * - un bouton est pressé
@@ -23,6 +24,11 @@
             $(".btn").on(codeBtnRelease, function() {
                 postCmd(postCmdBtnRelease);
             });
+            $("#speed_slider").on("change", function(){
+            	let newSpeed = this.value;
+            	$("#speed").text(newSpeed);
+            	postCmd(CHANGE_SPEED.concat('',newSpeed));
+			})
         });
 
         /* Requête POST */
@@ -38,23 +44,30 @@
 <body>
 <div class="">
     <h1>Flux vidéo</h1>
-    <img src="{{ url_for('video_feed') }}" alt="stream">
+    <img src="{{ url_for('video_feed') }}" alt="stream" width="640" height="480">
 </div>
 <table class="">
 		<tr>
 			<td>
 				<div >
-					<button id="forward" class="btn"></button>
+					<button id="forward" class="btn" width="100px" height="50px"></button>
 				</div>
 				<div>
-					<button id='turn_left' class="btn"></button>
-					<button id='turn_right' class="btn"></button>
+					<button id='turn_left' class="btn" width="50px" height="50px"></button>
+					<button id='turn_right' class="btn" width="50px" height="50px"></button>
 				</div>
 				<div>
-					<button id='backward' class="btn"></button>
+					<button id='backward' class="btn" width="100px" height="50px"></button>
 				</div>
 			</td>
 		</tr>
+            <tr>
+                <td><label>Speed: </label><label id="speed">50</label></td>
+                <td>
+					<input id="speed_slider" type="range" min="0" max="100" value="50">
+                </td>
+            </tr>
+
 	</table>
 </body>
 </html>

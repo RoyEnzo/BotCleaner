@@ -1,12 +1,26 @@
 import RPi.GPIO as GPIO
 
 
-class Motor:
-    """ Classe pour moteur N20 du AlphaBot2 """
+class Wheel:
 
-    def __init__(self, in_1, in_2, in_pwm, frequency):
-        self.IN_1 = in_1
-        self.IN_2 = in_2
+    def __init__(self, in_1, in_2, in_pwm, frequency, reverse):
+        """
+        Moteur N20 utilisé par AlphaBot2-Base
+        Args:
+            in_1 (int): pin de sortie 1
+            in_2 (int): pin de sortie 2
+            in_pwm (int): pin de sortie pwm
+            frequency (int): frequence de pwm
+            reverse (bool): Is the motor reversed ?
+        """
+
+        if reverse:
+            self.IN_1 = in_2
+            self.IN_2 = in_1
+        else:
+            self.IN_1 = in_1
+            self.IN_2 = in_2
+
         self.IN_PWM = in_pwm
         self.FREQUENCY = frequency
 
@@ -18,24 +32,21 @@ class Motor:
         self.pwm.start(0)
 
     def change_duty_cycle(self, duty_cycle):
-        """ Change le rapport cyclique du moteur """
         self.pwm.ChangeDutyCycle(duty_cycle)
 
-    def rotate_counterclockwise(self, duty_cycle):
-        """ Tourne le moteur dans le sens antihoraire """
+    def forward(self, duty_cycle):
         GPIO.output(self.IN_1, GPIO.HIGH)
         GPIO.output(self.IN_2, GPIO.LOW)
+        print("high")
         self.change_duty_cycle(duty_cycle)
 
 
-    def rotate_clockwise(self, duty_cycle):
-        """ Tourne le moteur dans le sens horaire """
+    def backward(self, duty_cycle):
         GPIO.output(self.IN_1, GPIO.LOW)
         GPIO.output(self.IN_2, GPIO.HIGH)
         self.change_duty_cycle(duty_cycle)
 
     def stop(self):
-        """ Arrete le moteur """
         GPIO.output(self.IN_1, GPIO.LOW)
         GPIO.output(self.IN_2, GPIO.LOW)
         self.change_duty_cycle(0)
