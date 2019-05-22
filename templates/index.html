@@ -26,7 +26,7 @@
             });
             $("#speed_slider").on("change", function(){
             	let newSpeed = this.value;
-            	$("#speed").text(newSpeed);
+            	$("#speed").text('Vitesse: '+newSpeed);
             	postCmd(CHANGE_SPEED.concat('',newSpeed));
 			})
         });
@@ -40,34 +40,48 @@
 			});
         }
     </script>
+	<style>
+		#main{
+			width: 640px;
+		}
+		td {
+			text-align: center;
+			vertical-align: middle;
+		}
+		.btn {
+			width: 100px;
+			height: 50px;
+		}
+		table, #speed_slider{
+			width:100%;
+		}
+		#stream{
+			width: 100%;
+		}
+	</style>
 </head>
-<body>
+<body id="main">
 <div class="">
-    <h1>Flux vidéo</h1>
-    <img src="{{ url_for('video_feed') }}" alt="stream" width="640" height="480">
+    <h1>Manette de contrôle</h1>
+    <img id="stream" src="{{ url_for('video_feed') }}" alt="stream"><br>
 </div>
-<table class="">
+	<table class="">
 		<tr>
-			<td>
-				<div >
-					<button id="forward" class="btn" width="100px" height="50px"></button>
-				</div>
-				<div>
-					<button id='turn_left' class="btn" width="50px" height="50px"></button>
-					<button id='turn_right' class="btn" width="50px" height="50px"></button>
-				</div>
-				<div>
-					<button id='backward' class="btn" width="100px" height="50px"></button>
-				</div>
-			</td>
+			<label id="speed">Vitesse: 50</label>
 		</tr>
-            <tr>
-                <td><label>Speed: </label><label id="speed">50</label></td>
-                <td>
-					<input id="speed_slider" type="range" min="0" max="100" value="50">
-                </td>
-            </tr>
-
+		<tr>
+			<input id="speed_slider" type="range" min="0" max="100" value="50">
+		</tr>
+		<tr>
+			<td colspan="2"><button id="forward" class="btn" >avancer</button></td>
+		</tr>
+		<tr>
+			<td><button id='turn_left' class="btn" >tourner à gauche</button></td>
+			<td><button id='turn_right' class="btn" >tourner à droite</button></td>
+		</tr>
+		<tr>
+			<td colspan="2"><button id='backward' class="btn" >reculer</button></td>
+		</tr>
 	</table>
 </body>
 </html>

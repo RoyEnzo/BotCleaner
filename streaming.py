@@ -36,6 +36,7 @@ class StreamingOutput(object):
     def add_square_target_on_frame(self):
         img = Image.open(io.BytesIO(self.frame))
         draw = ImageDraw.Draw(img)
+
         draw.rectangle(self.coords_object, outline=StreamingOutput.SQUARE_COLOR)
 
         self.frame = self.convert_img_to_bytes(img)

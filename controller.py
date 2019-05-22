@@ -1,4 +1,5 @@
 from alphabot2 import AlphaBot2
+from math import sqrt, pow
 
 class Controller:
 
@@ -29,17 +30,39 @@ class Controller:
         elif self.CMD_SPEED in cmd:
             dutycycle = int(cmd.split(self.CMD_SEPARATOR)[1])
 
-        if 0 <= dutycycle <= 100:
-            self.alphabot.dc_left = dutycycle
-            self.alphabot.dc_right = dutycycle
+            if 0 <= dutycycle <= 100:
+                self.alphabot.dc_left = dutycycle
+                self.alphabot.dc_right = dutycycle
+                self.alphabot.dc = dutycycle
 
 
-    def follow_object(self,image_resolution,object_coords):
-        y1,x1,y2,x2 = object_coords
-        width, height = image_resolution
+    def follow_object(self,center,object_coords, distance):
+        y0,x0,y1,x1 = object_coords
+        y_center, x_center = center
+        duty_cycle = self.alphabot.dc
 
-        y_center = int(width / 2)
-        x_center = int(height / 2)
-        y = int((y1 + y2) / 2)
-        x = int((x1 + x2) / 2)
+        self.alphabot.stop()
+
+        if min(object_coords) <= 0:
+            self.alphabot.set_duty_cycle(duty_cycle,-duty_cycle)
+        else:
+
+            deviation_pourcentage = distance / x_center
+            deviation_duty_cycle = int(duty_cycle - duty_cycle*deviation_pourcentage)
+
+            print("=====================")
+            print("distance : ", distance)
+            print("center : ")
+            print("deviation : ", deviation_pourcentage, "%")
+            print("deviation : ", deviation_duty_cycle, "dc")
+
+            if x0 < x_center:
+                print('direction : right')
+                self.alphabot.set_duty_cycle(duty_cycle,deviation_duty_cycle)
+            else:
+                print('direction : left')
+                self.alphabot.set_duty_cycle(deviation_duty_cycle,duty_cycle)
+
+
+
 
