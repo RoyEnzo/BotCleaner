@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotCleaner - Auto</title>
+
+    <script src="{{ url_for('static', filename='jquery.js') }}"></script>
+    <script>
+		let CHANGE_SPEED = "speed=";
+        let urlPostCmd = "/api/robot/cmd";
+
+        $(function() {
+            $("#speed_slider").on("change", function(){
+            	let newSpeed = this.value;
+            	$("#speed").text('Vitesse: '+newSpeed);
+            	postCmd(CHANGE_SPEED.concat('',newSpeed));
+			})
+        });
+
+        /* Requête POST */
+        function postCmd(cmd){
+            var data = { "cmd": cmd };
+            $.post(urlPostCmd,data, function (dstatus){
+				console.log('${status}');
+			});
+        }
+    </script>
+	<style>
+		#main{
+			width: 640px;
+		}
+		td {
+			text-align: center;
+			vertical-align: middle;
+		}
+		table, #speed_slider{
+			width:100%;
+		}
+		#stream{
+			width: 100%;
+		}
+	</style>
+</head>
+<body id="main">
+<div class="">
+    <h1>Automatique</h1>
+    <img id="stream" src="{{ url_for('video_feed') }}" alt="stream"><br>
+</div>
+	<table class="">
+		<tr>
+			<label id="speed">Vitesse: 50</label>
+		</tr>
+		<tr>
+			<input id="speed_slider" type="range" min="0" max="100" value="50">
+		</tr>
+	</table>
+</body>
+</html>
+
