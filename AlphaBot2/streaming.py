@@ -55,7 +55,7 @@ class StreamingOutput(object):
                 Flux d'images.
 
         Returns (bytes):
-            ???
+
         """
         if buf.startswith(b'\xff\xd8'):
             # New frame, copy the existing buffer's content and notify all

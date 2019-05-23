@@ -3,7 +3,7 @@ import os
 
 import cv2
 from skimage import io
-from math import sqrt, pow, hypot
+from math import hypot
 import requests
 from datetime import datetime
 
@@ -127,11 +127,11 @@ def find_object(mask, list_first_white):
     Notes:
         L'algorithme cherche les y0,x0,y1,x1 de la manière suivante:
 
-        - Pour chaque pixels blanc de la liste
+        - Pour chaque pixel blanc de la liste
             - Verifier en dessous si pixel noir
-             - SI permiere colonne avec du noir: x0
-             - SI derniere colonne avec du noir: x1
-             - POUR chaque lignes dans chaque colonnes
+             - SI permière colonne avec du noir: x0
+             - SI dernière colonne avec du noir: x1
+             - POUR chaque ligne dans chaque colonne
                 - SI première ligne avec du noir: y0
                 - SI dernière ligne avec du noir: y1
 
@@ -289,7 +289,7 @@ if __name__ == '__main__':
             timer = datetime.now()
 
             # -- POST serveur --
-            coords = {'x0': x0,
+            values = {'x0': x0,
                       'y0': y0,
                       'x1': x1,
                       'y1': y1,
@@ -299,7 +299,7 @@ if __name__ == '__main__':
                       }
 
             path = URL_SERVER + PATH_ANALYSE_CNTLR
-            r = requests.post(path, data=coords)
+            r = requests.post(path, data=values)
             post_timer = datetime.now() - timer
 
             # -- Console output--

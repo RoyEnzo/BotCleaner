@@ -1,6 +1,5 @@
 from alphabot2 import AlphaBot2
 
-
 class Controller:
     """
     Classe permettant de contrôler le robot en fonction des commandes
@@ -42,13 +41,13 @@ class Controller:
     CMD_SPEED = "speed="
     CMD_SEPARATOR = '='
 
-    def __init__(self, alphabot):
+    def __init__(self):
         """
         Args:
             alphabot:
                 Robot AlphaBot2 à contrôler
         """
-        self.alphabot = alphabot
+        self.alphabot = AlphaBot2()
 
     def command(self, cmd):
         """

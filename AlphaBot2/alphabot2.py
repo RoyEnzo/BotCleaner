@@ -30,6 +30,16 @@ class AlphaBot2:
             Moteur rapport cyclique par default (0-100).
         FREQUENCY  (int):
             Frequence du PWM.
+        dc_left (int):
+            Duty cycle moteur gauche.
+        dc_right (int):
+            Duty cycle moteur droit.
+        dc (int):
+            Duty cycle de base.
+        motor_left (Wheel):
+            Roue gauche.
+        motor_right (Wheel):
+            Roue droite.
 
     Methods:
         forward():
