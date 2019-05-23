@@ -7,9 +7,9 @@ from math import sqrt, pow, hypot
 import requests
 from datetime import datetime
 
-ip_port_serveur = sys.argv[1]
+ip_port_server = sys.argv[1]
 
-URL_SERVER = 'http://'+ip_port_serveur
+URL_SERVER = 'http://' + ip_port_server
 print(URL_SERVER)
 
 PATH_LAST_FRAME = '/api/camera/last_frame'
@@ -112,7 +112,7 @@ def get_first_white_pixel_column(mask):
         column = array2d_column(cropped_mask, column_index)
 
         for row_index, value in enumerate(column):
-            if value > WHITE_VALUE:
+            if value == WHITE_VALUE:
 
                 list_white_pixels.append((row_index + start_row_index, column_index))  # mask cropped before, adjust row
                 break
@@ -168,15 +168,13 @@ def find_object(mask, list_first_white):
             for row_index, value in enumerate(column_values):
                 row_index += start_row_index  # Colonne coupé à partir du premier pixel blanc
 
-                # Premiere ligne comportant du noir -> y0
-                # Derniere ligne comportant du noir -> y1
                 if (y0_object > row_index or y0_object == DEFAULT_OBJECT_COORD) and value == BLACK_VALUE:
                     y0_object = row_index
                 if y1_object < row_index and value == BLACK_VALUE:
                     y1_object = row_index
 
     if min(y0_object, x0_object, y1_object, x1_object) < 0:
-        (y0_object, x0_object, y1_object, x1_object) = ((DEFAULT_OBJECT_COORD,)) * 4
+        (y0_object, x0_object, y1_object, x1_object) = (DEFAULT_OBJECT_COORD,) * 4
 
     return (y0_object, x0_object), (y1_object, x1_object)
 
@@ -250,7 +248,7 @@ def get_center_image(image):
     """
     height, width, _ = image.shape
 
-    return (int(height / 2), int(width / 2))
+    return int(height / 2), int(width / 2)
 
 
 if __name__ == '__main__':
@@ -306,7 +304,10 @@ if __name__ == '__main__':
 
             # -- Console output--
             print("--------------")
-            os.system('clear')
+            try:
+                os.system('clear')
+            except:
+                pass
             if  r.status_code == 200:
                 print("Center image (y,x) : ", y_center, x_center )
                 print("Center object (y,x): ", y,x )
@@ -317,6 +318,6 @@ if __name__ == '__main__':
                 print("Post img time : ", post_timer.total_seconds())
                 print("Total time    : ", (img_ask_timer + analyse_timer + post_timer).total_seconds())
             else:
-                print("ERROR: ",r.status_code)
+                print("ERROR: ", r.status_code)
     except KeyboardInterrupt:
         exit(0)
